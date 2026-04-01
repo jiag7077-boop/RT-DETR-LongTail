@@ -1,0 +1,90 @@
+__include__: [
+  './rtdetrv2_r18vd_120e_coco.yml',
+  '../base/rt_deim.yml',
+  '../dataset/my_custom_detection.yml'
+]
+
+print_freq: 400
+output_dir: ./outputs/baseline(r50)
+
+PResNet:
+  depth: 50
+  variant: d
+  pretrained: True
+
+epoches: 120
+flat_epoch: 80
+no_aug_epoch: 10
+
+optimizer:
+  type: AdamW
+  params:
+    -
+      params: '^(?=.*(?:norm|bn)).*$'
+      weight_decay: 0.
+  lr: 0.0002
+  betas: [0.9, 0.999]
+  weight_decay: 0.0001
+
+warmup_iter: 800
+lr_warmup_scheduler:
+  type: LinearWarmup
+  warmup_duration: 800
+
+train_dataloader:
+  total_batch_size: 16
+  num_workers: 8
+  dataset:
+    transforms:
+      mosaic_prob: 0.0
+      ops:
+        - {type: Mosaic, output_size: 640, probability: 0.0, rotation_range: 10, translation_range: [0.1, 0.1], scaling_range: [0.5, 1.5], fill_value: 114}
+        - {type: RandomPhotometricDistort, p: 0.5}
+        - {type: RandomZoomOut, fill: 0}
+        - {type: RandomIoUCrop, p: 0.8}
+        - {type: SanitizeBoundingBoxes, min_size: 1}
+        - {type: RandomHorizontalFlip}
+        - {type: Resize, size: [640, 640]}
+        - {type: SanitizeBoundingBoxes, min_size: 1}
+        - {type: ConvertPILImage, dtype: 'float32', scale: True}
+        - {type: ConvertBoxes, fmt: 'cxcywh', normalize: True}
+      policy:
+        epoch: [4, 110, 120]
+  collate_fn:
+    type: BatchImageCollateFunction
+    mixup_prob: 0.0
+    mixup_epochs: [0, 0]
+    stop_epoch: 110
+
+eval_spatial_size: [640, 640]
+
+val_dataloader:
+  total_batch_size: 16
+  dataset:
+    transforms:
+      ops:
+        - {type: Resize, size: [640, 640]}
+        - {type: ConvertPILImage, dtype: 'float32', scale: True}
+
+# ============================================================
+# ALTR: Adaptive Long-Tail Resampling (Section 3.4)
+# Uses validation AP feedback to dynamically adjust sampling
+# ============================================================
+ALTR:
+  USE: true
+  RFS_T: 1500          # Frequency threshold T for RFS (Eq. 1)
+
+# ============================================================
+# SPFM: Self-Paced Focused Matching (Section 3.5)
+# Includes:
+# - Gaussian bilateral attenuation with robust center estimation
+# - Teacher evaluation for class-level priority weighting
+# ============================================================
+SPFM:
+  USE: true
+  UPDATE_INTERVAL: 5
+  EMA_THRESHOLD: 1000
+  TOTAL_EPOCHS: 120
+  TAU_START: 0.2
+  TAU_END: 1.0
+  LAMBDA_SMOOTH: 0.1

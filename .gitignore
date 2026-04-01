@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# PyTorch models
+*.pth
+*.pt
+*.onnx
+
+# Data (do NOT upload)
+data/*/images/
+data/*/annotations*.json
+*.jpg
+*.jpeg
+*.png
+*.bmp
+
+# Training outputs
+*.log
+wandb/
+runs/
+outputs/
+tensorboard/
+stats/
+SPFM_probes/
+eval/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo

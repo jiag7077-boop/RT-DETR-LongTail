@@ -5,7 +5,7 @@ Detection with Lightweight RT-DETR"* (submitted to Pattern Analysis and
 Applications).
 
 <p align="center">
-  <img src="docs/framework.png" width="85%">
+  <img src="docs/image.png" width="85%">
 </p>
 
 ## Highlights

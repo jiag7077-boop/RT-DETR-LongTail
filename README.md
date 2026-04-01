@@ -1,8 +1,7 @@
 # Robust Joint Training for Long-Tailed Defect Detection with Lightweight RT-DETR
 
 Official implementation of *"Robust Joint Training for Long-Tailed Defect
-Detection with Lightweight RT-DETR"* (submitted to Pattern Analysis and
-Applications).
+Detection with Lightweight RT-DETR"* 
 
 <p align="center">
   <img src="docs/image.png" width="85%">
